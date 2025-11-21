@@ -14,7 +14,7 @@ const createAdmin = async () => {
 
     const existing = await Admin.findOne({ email: "admin@gplusindia.com" });
     if (existing) {
-      console.log("⚠️ Admin already exists");
+      console.log(" Admin already exists");
       return;
     }
 
@@ -25,10 +25,10 @@ const createAdmin = async () => {
       role: "admin",
     });
 
-    console.log("✅ Admin created successfully");
+    console.log(" Admin created successfully");
     process.exit();
   } catch (error) {
-    console.error("❌ Error creating admin:", error.message);
+    console.error(" Error creating admin:", error.message);
     process.exit(1);
   }
 };

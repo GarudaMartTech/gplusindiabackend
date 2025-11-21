@@ -8,46 +8,54 @@ import adminAuthRoutes from "./routes/adminAuth.js";
 import blogRoutes from "./routes/blogs.js";
 import uploadRoutes from "./routes/upload.js";
 
-dotenv.config(); //  Load .env variables
+dotenv.config(); // Load .env variables
 
 const app = express();
 
-//  Security Middlewares
+// Security Middlewares
 app.use(helmet());
 app.use(express.json({ limit: "10mb" })); // handle JSON payloads safely
 
-//  CORS setup — restrict only to frontend origin
+// CORS setup — allow only trusted origins
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: [
+      "https://gplusindia.com",
+      "https://www.gplusindia.com",
+      "http://localhost:3000"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
-//  Connect MongoDB (async safe)
+
+// Connect MongoDB and start the server
 const startServer = async () => {
   try {
     await connectDB();
-    console.log(" MongoDB Connected Successfully");
+    // console.log(" MongoDB Connected Successfully");
 
-    //  Routes
+    // Routes
     app.use("/api/admin", adminAuthRoutes);
     app.use("/api/blogs", blogRoutes);
     app.use("/api/upload", uploadRoutes);
 
-    //  Simple test route
+    // Test route
     app.get("/api/test", (req, res) => {
-      res.json({ message: "API is working fine " });
+      res.json({ message: "API is working fine" });
     });
 
-    //  Default root route
+    // Default root route
     app.get("/", (req, res) => res.send("API OK"));
 
-    //  Start Server
+    // Start Server
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () =>
-      console.log(` Server running on port ${PORT}`)
-    );
+    const HOST = "0.0.0.0"; //  Allow connections from anywhere (important for EC2)
+    app.listen(PORT, HOST, () => {
+      // console.log(` Server running on http://${HOST}:${PORT}`);
+    }); 
   } catch (err) {
     console.error(" Error starting server:", err.message);
     process.exit(1);

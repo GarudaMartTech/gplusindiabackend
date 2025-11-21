@@ -8,7 +8,7 @@ import { protect } from "../middleware/auth.js";
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post("/", protect, upload.single("image"), async (req, res) => {
+router.post("/", protect, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
 
