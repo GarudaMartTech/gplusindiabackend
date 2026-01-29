@@ -1,49 +1,43 @@
-
-// import jwt from "jsonwebtoken";
-// import Admin from "../models/Admin.js";
-
-// export const protect = async (req, res, next) => {
-//   try {
-//     const header = req.headers.authorization;
-//     if (!header || !header.startsWith("Bearer ")) return res.status(401).json({ message: "Not authorized" });
-//     const token = header.split(" ")[1];
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     req.admin = await Admin.findById(decoded.id).select("-password");
-//     if (!req.admin) return res.status(401).json({ message: "Admin not found" });
-//     next();
-//   } catch (err) {
-//     return res.status(401).json({ message: "Token invalid" });
-//   }
-// };                      
-
 const ErrorHandler = require("../utils/ErrorHandler");
 const asyncHandler = require("../utils/asyncHandler");
-const config = require("../config/index");
 const jwt = require("jsonwebtoken");
+const config = require("../config/index");
 const User = require("../models/userModel");
+const Store = require("../models/Store");
 
+/* ===============================
+   USER / ADMIN AUTH
+================================ */
 exports.isAuthenticatedUser = asyncHandler(async (req, res, next) => {
   const { token } = req.cookies;
-// console.log("token", token)
-// console.log("function called")
+
   if (!token) {
-    return next(new ErrorHandler("please login to access this resource", 401));
+    return next(new ErrorHandler("Please login to access this resource", 401));
   }
 
-  const decodedata = jwt.verify(token, config.JWT_SECRET);
+  const decoded = jwt.verify(token, config.JWT_SECRET);
 
-  req.user = await User.findById(decodedata.id);
+  //  user route 
+  if (decoded.role === "STORE") {
+    return next(new ErrorHandler("Not authorized as user", 403));
+  }
+
+  req.user = await User.findById(decoded.id);
+
+  if (!req.user) {
+    return next(new ErrorHandler("User not found", 401));
+  }
 
   next();
 });
 
+/* ROLE BASED AUTH (ADMIN, USER) */
 exports.authorizeRoles = (...roles) => {
   return (req, res, next) => {
-  
-    if (!roles.includes(req.user.role)) {
+    if (!req.user || !roles.includes(req.user.role)) {
       return next(
         new ErrorHandler(
-          `Role: ${req.user.role} is not allowed to access this resource`,
+          `Role: ${req.user?.role} is not allowed`,
           403
         )
       );
@@ -52,3 +46,66 @@ exports.authorizeRoles = (...roles) => {
   };
 };
 
+/* ===============================
+   STORE AUTH
+================================ */
+exports.isAuthenticatedStore = asyncHandler(async (req, res, next) => {
+  const { token } = req.cookies;
+
+  if (!token) {
+    return next(new ErrorHandler("Please login as store", 401));
+  }
+
+  const decoded = jwt.verify(token, config.JWT_SECRET);
+
+  //  FIXED HERE
+  if (decoded.role !== "STORE") {
+    return next(new ErrorHandler("Not authorized as store", 403));
+  }
+
+  req.store = await Store.findById(decoded.id);
+
+  if (!req.store) {
+    return next(new ErrorHandler("Store not found", 404));
+  }
+
+  next();
+});
+
+/* OPTIONAL EXTRA PROTECTION */
+exports.authorizeStore = (req, res, next) => {
+  if (!req.store) {
+    return next(new ErrorHandler("Store access only", 403));
+  }
+  next();
+};
+
+/* ======================================================
+   USER OR STORE OR ADMIN ACCESS
+====================================================== */
+exports.isAuthenticatedUserOrStore = asyncHandler(async (req, res, next) => {
+  const { token } = req.cookies;
+
+  if (!token) {
+    return next(new ErrorHandler("Please login to access this resource", 401));
+  }
+
+  const decoded = jwt.verify(token, config.JWT_SECRET);
+
+  //  STORE LOGIN
+   if (decoded.role !== "STORE") {
+    req.user = await User.findById(decoded.id);
+    if (!req.user) {
+      return next(new ErrorHandler("User not found", 401));
+    }
+    return next();
+  }
+
+  //  STORE
+  req.store = await Store.findById(decoded.id);
+  if (!req.store) {
+    return next(new ErrorHandler("Store not found", 404));
+  }
+
+  next();
+});

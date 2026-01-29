@@ -9,7 +9,7 @@ const BlogSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // IMPORTANT: slug field (unique)
+    // IMPORTANT: slug field 
     slug: {
       type: String,
       unique: true,

@@ -23,8 +23,6 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
- 
 router.post("/register", upload.single("image"),userRegister);
 // router.route("/register").post(userRegister)
 router.route("/login").post(userLogin);

@@ -65,7 +65,7 @@ class ApiFeatures {
       searchQuery.brand = brand;
     }
 
-    // Apply search query to the base query
+    
     this.query = this.query.find(searchQuery);
 
     return this;

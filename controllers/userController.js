@@ -51,7 +51,7 @@ exports.userRegister = asyncHandler(async (req, res, next) => {
       ContentType: req.file.mimetype,
     };
 
-    // let userAvatar = [];
+    // let userAvatar 
     let data = await client.upload(params).promise();
     console.log("image uploaded successfull", data);
 
@@ -134,7 +134,7 @@ exports.sendWhatsappOtp = asyncHandler(async (req, res, next) => {
 
   if (!user) {
     user = await User.create({
-      name: "OTP User",
+      name: "User",
       phone,
       email: `otp_${phone}@otp.com`,
       password: crypto.randomBytes(10).toString("hex"),
@@ -223,8 +223,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       <p style="font-size: 13px;">Do let us know if you face any problem in resetting your password.</p>
   
       <h1 style="font-size: 12px;">Best Regards</h1>
-      <p style="font-size: 13px;">Team gshoppi.com</p>
-      <p style="font-size: 13px;">info@gshoppi.com</p>
+      <p style="font-size: 13px;">Team gplusindia.com</p>
+      <p style="font-size: 13px;">info@gplusindia.com</p>
     </body>
   </html>
   `;
@@ -303,15 +303,15 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     </p>
 
     <h1 style="font-size: 12px;">Best Regards</h1>
-    <p style="font-size: 12px;">Team gshoppi.com</p>
-    <p style="font-size: 12px;">support@gshoppi.com</p>
+    <p style="font-size: 12px;">Team gplusindia.com</p>
+    <p style="font-size: 12px;">support@gplusindia.com</p>
   </body>
 </html>
 `;
 
   await sendEmail({
     email: user.email,
-    subject: `Gshoppi.com - Password Changed Successfully`,
+    subject: `gplusindia.com - Password Changed Successfully`,
     html: Text,
   });
 
@@ -322,7 +322,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 exports.getUserDetails = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
-  // res.status(200).json(user);
+
   sendToken(user, 200, res);
 });
 
@@ -519,3 +519,29 @@ exports.getWishlist = asyncHandler(async (req, res, next) => {
     console.log(error);
   }
 });
+
+const sendStoreToken = (store, statusCode, res) => {
+  const token = jwt.sign(
+    { id: store._id, role: "STORE" },
+    config.JWT_SECRET,
+    { expiresIn: config.JWT_EXPIRE }
+  );
+
+  res
+    .status(statusCode)
+    .cookie("token", token, {
+      httpOnly: true,
+      expires: new Date(
+        Date.now() + 5 * 24 * 60 * 60 * 1000
+      ),
+    })
+    .json({
+      success: true,
+      store: {
+        id: store._id,
+        storeName: store.storeName,
+        role: "STORE",
+      },
+    });
+};
+

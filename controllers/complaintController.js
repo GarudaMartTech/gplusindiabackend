@@ -4,6 +4,12 @@ const AWS = require("aws-sdk");
 const sharp = require("sharp");
 const config = require("../config/index");
 const sendWhatsAppTemplate = require("../utils/sendWhatsAppTemplate");
+// const asyncHandler = require("../utils/asyncHandler");
+// const ErrorHandler = require("../utils/ErrorHandler");
+const asyncHandler = require("../utils/asyncHandler");
+const ErrorHandler = require("../utils/ErrorHandler");
+// const Complaint = require("../models/Complaint");
+const Store = require("../models/Store");
 
 
 // WHATSAPP TEMPLATES
@@ -53,6 +59,30 @@ const compressImage = async (buffer, type = "product") => {
 };
 
 
+// ===============================
+//  AUTO STORE FIND FUNCTION 
+// ===============================
+const findStoreByDistrict = async (district) => {
+  if (!district) return null;
+
+  // 1️ District match store
+  let store = await Store.findOne({
+    city: { $regex: new RegExp(`^${district}$`, "i") },
+    active: true,
+  });
+
+  if (store) return store;
+
+  // 2️ Fallback HO store
+  const hoStore = await Store.findOne({
+     city: { $regex: new RegExp("^HO$", "i") },
+    active: true,
+  });
+
+  return hoStore || null;
+};
+
+
 // CREATE COMPLAINT
 
 exports.createComplaint = async (req, res) => {
@@ -89,9 +119,9 @@ exports.createComplaint = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    
+    // =========================
     // UPLOAD + COMPRESS IMAGES
-    
+    // =========================
     let images = [];
 
     if (req.files?.length) {
@@ -126,9 +156,28 @@ exports.createComplaint = async (req, res) => {
       }
     }
 
-    
+    // =========================
+    //  AUTO STORE ASSIGN LOGIC
+    // =========================
+    const matchedStore = await findStoreByDistrict(district);
+
+    let assignedStore = null;
+    let assignedAt = null;
+    let status = "RECEIVED";
+
+    if (matchedStore) {
+      assignedStore = matchedStore._id;
+      assignedAt = new Date();
+      status = "RECEIVED";
+
+      console.log("AUTO STORE ASSIGNED:", matchedStore.storeName);
+    } else {
+      console.log("NO STORE FOUND - Keeping unassigned");
+    }
+
+    // =========================
     // SAVE COMPLAINT
-    
+    // =========================
     const complaint = await Complaint.create({
       complaintId: "GPLUS-" + Date.now(),
       customer: req.user._id,
@@ -144,9 +193,24 @@ exports.createComplaint = async (req, res) => {
       orderId: orderId || "NA",
       description,
       images,
-      status: "RECEIVED",
-      timeline: [{ status: "RECEIVED", date: new Date() }],
+      status,
+      assignedStore,
+      assignedAt,
+      timeline: [{ status, date: new Date() }],
     });
+
+    // =========================
+    //  PUSH COMPLAINT INTO STORE
+    // =========================
+    if (matchedStore) {
+      await Store.findByIdAndUpdate(matchedStore._id, {
+        $addToSet: {
+          assignedComplaints: {
+            complaint: complaint._id,
+          },
+        },
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -154,19 +218,20 @@ exports.createComplaint = async (req, res) => {
       complaint,
     });
 
-    
+    // =========================
     // WHATSAPP NOTIFICATION
-    
+    // =========================
     try {
       await sendWhatsAppTemplate(
-  formatMobile(complaint.mobile),
-  WHATSAPP_TEMPLATES.RECEIVED,
-  complaint.complaintId,
-  complaint.customerName
-);
+        formatMobile(complaint.mobile),
+        WHATSAPP_TEMPLATES.RECEIVED,
+        complaint.complaintId,
+        complaint.customerName
+      );
     } catch (err) {
       console.error("WhatsApp Error:", err?.response?.data || err.message);
     }
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -220,6 +285,82 @@ exports.allComplaints = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// Asign Store
+
+exports.assignComplaintToStore = async (req, res, next) => {
+  try {
+    const { complaintId } = req.params;
+    const { storeId } = req.body;
+
+    console.log("ASSIGN API HIT");
+    console.log("Complaint ID:", complaintId);
+    console.log("Store ID:", storeId);
+
+    if (!complaintId || !storeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Complaint ID & Store ID required",
+      });
+    }
+
+    const complaint = await Complaint.findByIdAndUpdate(
+  complaintId,
+  {
+    assignedStore: storeId,
+    status: "IN_PROGRESS",
+    assignedAt: new Date(),
+    assignedBy: req.user._id,
+  },
+  { new: true }
+);
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found",
+      });
+    }
+
+    complaint.assignedStore = storeId;
+    complaint.assignedAt = new Date();
+    complaint.assignedBy = req.user._id;
+
+    await complaint.save();
+
+    // const updatedComplaint = await Complaint.findById(complaintId)
+    //   .populate("assignedStore", "storeName storeCode");
+
+
+    const updatedStore = await Store.findByIdAndUpdate(
+  storeId,
+  {
+    $addToSet: {
+      assignedComplaints: {
+        complaint: complaint._id,
+      },
+    },
+  },
+  { new: true }
+);
+
+
+    res.status(200).json({
+      success: true,
+      message: "Complaint assigned successfully",
+       store: updatedStore,
+    });
+  } catch (error) {
+    console.error("ASSIGN ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while assigning complaint",
+    });
+  }
+};
+
+
+
 
 
 // UPDATE STATUS

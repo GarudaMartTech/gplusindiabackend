@@ -8,9 +8,11 @@ const {
   allComplaints,
   updateStatus,
   submitFeedback,
+  assignComplaintToStore ,
 } = require("../controllers/complaintController");
 
-const { isAuthenticatedUser, authorizeRoles } = require("../middleware/auth");
+
+const { isAuthenticatedUser, authorizeRoles,isAuthenticatedUserOrStore, } = require("../middleware/auth");
 
 // CREATE COMPLAINT
 router.post(
@@ -23,7 +25,7 @@ router.post(
 // MY COMPLAINTS
 router.get("/my", isAuthenticatedUser, myComplaints);
 
-// FEEDBACK ✅ (ALAG ROUTE)
+// FEEDBACK (ALAG ROUTE)
 router.post(
   "/:id/feedback",
   isAuthenticatedUser,
@@ -37,7 +39,7 @@ router.post(
 );
 
 // SINGLE COMPLAINT
-router.get("/:id", isAuthenticatedUser, getComplaintById);
+router.get("/:id", isAuthenticatedUserOrStore, getComplaintById);
 
 // ADMIN
 router.get(
@@ -46,7 +48,13 @@ router.get(
   authorizeRoles("admin"),
   allComplaints
 );
+router.put(
+  "/:complaintId/assign",
+  isAuthenticatedUser,
+  authorizeRoles("admin"),
+  assignComplaintToStore
+);
 
-router.put("/:id/status", isAuthenticatedUser, updateStatus);
+router.put("/:id/status", isAuthenticatedUserOrStore, updateStatus);
 
 module.exports = router;

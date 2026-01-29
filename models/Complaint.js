@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 
 const complaintSchema = new mongoose.Schema(
   {
-    
-    
     complaintId: {
       type: String,
       required: true,
@@ -76,7 +74,6 @@ const complaintSchema = new mongoose.Schema(
       trim: true,
     },
 
-    
     images: [
       {
         key: {
@@ -90,11 +87,32 @@ const complaintSchema = new mongoose.Schema(
       },
     ],
 
-    
     status: {
       type: String,
       enum: ["RECEIVED", "IN_PROGRESS", "RESOLVED"],
       default: "RECEIVED",
+    },
+
+    // assignedStore: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Store",
+    //   default: null,
+    // },
+
+    assignedStore: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Store",   
+      default: null,
+    },
+
+    assignedAt: {
+      type: Date,
+    },
+
+    serviceStatus: {
+      type: String,
+      enum: ["received", "in_progress", "completed"],
+      default: "received",
     },
 
     assignedLevel: {
@@ -116,7 +134,6 @@ const complaintSchema = new mongoose.Schema(
       ref: "User",
     },
 
-    
     timeline: [
       {
         status: {
@@ -130,7 +147,6 @@ const complaintSchema = new mongoose.Schema(
       },
     ],
 
-    
     feedback: {
       rating: {
         type: Number,
@@ -161,7 +177,6 @@ const complaintSchema = new mongoose.Schema(
       },
     },
 
-   
     referral: {
       friendName: {
         type: String,
