@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema(
     },
     phone:{
       type: Number,
-      // required: [true,"please enter the number"],
       maxLength: [10,"number should be 10 character"],
       unique: true
     }, 
@@ -35,55 +34,49 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     avatar: {
-      public_id: {
-        type: String,
-      },
-      url: {
-        type: String,
-      },
+      public_id: { type: String },
+      url: { type: String },
     },
     role: {
       type: String,
       enum: ["customer", "store","user", "admin"],
       default: "user",
     },
-    // address: {
-    //   type: mongoose.Schema.Types.Mixed,
-    // },
-    wishlist:[{type: mongoose.Schema.Types.ObjectId,
+    wishlist:[{
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Product"
     }],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 
-
-    // WHATSAPP OTP LOGIN 
     otp: String,
     otpExpire: Date,
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
+// Hash password
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
-  }
+  if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+// ✅ FIXED JWT METHOD
 userSchema.methods.getJWTToken = function () {
-  return jwt.sign({ id: this._id }, config.JWT_SECRET, {
-    expiresIn: config.JWT_EXPIRE,
-  });
+  return jwt.sign(
+    { id: this._id },
+    config.JWT_SECRET,
+    {
+      expiresIn: config.JWT_EXPIRE || "5d",   // fallback safe value
+    }
+  );
 };
 
 userSchema.methods.comparePassword = async function (enteredpassword) {
   return bcrypt.compare(enteredpassword, this.password);
 };
 
-// generate forgot password
+// Forgot password token
 userSchema.methods.getResetPassword = function () {
   const forgotToken = crypto.randomBytes(20).toString("hex");
 
