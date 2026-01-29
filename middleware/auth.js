@@ -5,21 +5,23 @@ const config = require("../config/index");
 const User = require("../models/userModel");
 const Store = require("../models/Store");
 
-/* ===============================
-   USER / ADMIN AUTH
-================================ */
+/* ================= USER / ADMIN ================= */
 exports.isAuthenticatedUser = asyncHandler(async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
-    return next(new ErrorHandler("Please login to access this resource", 401));
+    return next(new ErrorHandler("Please login", 401));
   }
 
-  const decoded = jwt.verify(token, config.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(token, config.JWT_SECRET);
+  } catch (error) {
+    return next(new ErrorHandler("Invalid or expired token", 401));
+  }
 
-  //  user route 
   if (decoded.role === "STORE") {
-    return next(new ErrorHandler("Not authorized as user", 403));
+    return next(new ErrorHandler("User access only", 403));
   }
 
   req.user = await User.findById(decoded.id);
@@ -31,36 +33,35 @@ exports.isAuthenticatedUser = asyncHandler(async (req, res, next) => {
   next();
 });
 
-/* ROLE BASED AUTH (ADMIN, USER) */
+/* ================= ROLE AUTH ================= */
 exports.authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return next(
-        new ErrorHandler(
-          `Role: ${req.user?.role} is not allowed`,
-          403
-        )
+        new ErrorHandler(`Role ${req.user?.role} not allowed`, 403)
       );
     }
     next();
   };
 };
 
-/* ===============================
-   STORE AUTH
-================================ */
+/* ================= STORE ================= */
 exports.isAuthenticatedStore = asyncHandler(async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
-    return next(new ErrorHandler("Please login as store", 401));
+    return next(new ErrorHandler("Store login required", 401));
   }
 
-  const decoded = jwt.verify(token, config.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(token, config.JWT_SECRET);
+  } catch (error) {
+    return next(new ErrorHandler("Invalid or expired token", 401));
+  }
 
-  //  FIXED HERE
   if (decoded.role !== "STORE") {
-    return next(new ErrorHandler("Not authorized as store", 403));
+    return next(new ErrorHandler("Store access only", 403));
   }
 
   req.store = await Store.findById(decoded.id);
@@ -72,39 +73,32 @@ exports.isAuthenticatedStore = asyncHandler(async (req, res, next) => {
   next();
 });
 
-/* OPTIONAL EXTRA PROTECTION */
-exports.authorizeStore = (req, res, next) => {
-  if (!req.store) {
-    return next(new ErrorHandler("Store access only", 403));
-  }
-  next();
-};
-
-/* ======================================================
-   USER OR STORE OR ADMIN ACCESS
-====================================================== */
+/* ================= USER OR STORE ================= */
 exports.isAuthenticatedUserOrStore = asyncHandler(async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
-    return next(new ErrorHandler("Please login to access this resource", 401));
+    return next(new ErrorHandler("Login required", 401));
   }
 
-  const decoded = jwt.verify(token, config.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(token, config.JWT_SECRET);
+  } catch (error) {
+    return next(new ErrorHandler("Invalid or expired token", 401));
+  }
 
-  //  STORE LOGIN
-   if (decoded.role !== "STORE") {
-    req.user = await User.findById(decoded.id);
-    if (!req.user) {
-      return next(new ErrorHandler("User not found", 401));
+  if (decoded.role === "STORE") {
+    req.store = await Store.findById(decoded.id);
+    if (!req.store) {
+      return next(new ErrorHandler("Store not found", 404));
     }
     return next();
   }
 
-  //  STORE
-  req.store = await Store.findById(decoded.id);
-  if (!req.store) {
-    return next(new ErrorHandler("Store not found", 404));
+  req.user = await User.findById(decoded.id);
+  if (!req.user) {
+    return next(new ErrorHandler("User not found", 401));
   }
 
   next();

@@ -322,9 +322,12 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 exports.getUserDetails = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
 
-
-  sendToken(user, 200, res);
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });
+
 
 // get user by id  ---Admin
 exports.getUserByid = asyncHandler(async (req, res, next) => {
@@ -360,15 +363,16 @@ exports.userUpdatePassword = asyncHandler(async (req, res, next) => {
 
 // user update profile
 exports.updateProfile = asyncHandler(async (req, res, next) => {
-  // const id = req.id;
-
-  // console.log("updateProfile",id)
-  // console.log(req.user.avatar)
-
-  // delete previous image
+  
+  if (req.user.avatar && req.user.avatar.url) {
   let pathname = req.user.avatar.url;
-
   let urlObject = url.parse(pathname).pathname.slice(1);
+
+  await client.deleteObject({
+    Bucket: bucketName,
+    Key: urlObject,
+  }).promise();
+}
   // console.log(urlObject)
 
   let deleteImage = {
