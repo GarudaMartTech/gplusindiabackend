@@ -1,24 +1,24 @@
-const config = require("../config/index.js")
+const config = require("../config/index.js");
 
-const sendToken = (user,statusCode, res) => {  
-    const token = user.getJWTToken();
+const sendToken = (user, statusCode, res) => {  
+  const token = user.getJWTToken();
 
-    const options = {
-        expires: new Date(  
-            Date.now() + config.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-        ),
-        httpOnly: true,
-    secure: false,     // http ke liye false
+  const options = {
+    httpOnly: true,
+    secure: false,     // set true only if using HTTPS
     sameSite: "lax",
-    }
 
-    res.cookie("token",token,options)
+    // ✅ FIXED
+    maxAge: Number(config.COOKIE_EXPIRE || 5) * 24 * 60 * 60 * 1000
+  };
 
-    res.status(statusCode).json({
-        success: true,
-        user,
-        token
-    })
-}
+  res.cookie("token", token, options);
 
-module.exports = sendToken
+  res.status(statusCode).json({
+    success: true,
+    user,
+    token
+  });
+};
+
+module.exports = sendToken;
