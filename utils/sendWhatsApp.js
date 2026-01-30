@@ -7,7 +7,7 @@ const sendWhatsApp = async (phone, otp) => {
       throw new Error("WhatsApp ENV missing");
     }
 
-    // 🔥 phone normalize
+    // ✅ phone normalize
     const cleanPhone = phone.replace(/\D/g, "");
     const to = cleanPhone.startsWith("91")
       ? cleanPhone
@@ -18,18 +18,11 @@ const sendWhatsApp = async (phone, otp) => {
       to,
       type: "template",
       template: {
-        name: "otp", // EXACT Meta template name
+        name: "otp", // EXACT template name
         language: { code: "en" },
         components: [
           {
             type: "body",
-            parameters: [{ type: "text", text: otp }],
-          },
-          // ⚠️ ONLY if template has button
-          {
-            type: "button",
-            sub_type: "url",
-            index: 0,
             parameters: [{ type: "text", text: otp }],
           },
         ],
@@ -55,7 +48,6 @@ const sendWhatsApp = async (phone, otp) => {
       error.response?.data || error.message
     );
 
-    // 🔥 VERY IMPORTANT
     throw new Error(
       error.response?.data?.error?.message || "WhatsApp OTP failed"
     );
