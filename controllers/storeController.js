@@ -49,10 +49,16 @@ exports.storeLogin = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler("Store account is inactive", 403));
   }
 
+  // 🔥 SAFE JWT EXPIRE FIX
+  const jwtExpire =
+    typeof config.JWT_EXPIRE === "string" && config.JWT_EXPIRE.length
+      ? config.JWT_EXPIRE
+      : "5d";
+
   const token = jwt.sign(
     { id: store._id, role: "STORE" },
     config.JWT_SECRET,
-    { expiresIn: config.JWT_EXPIRE }
+    { expiresIn: jwtExpire }
   );
 
   console.log(" STORE LOGIN SUCCESS");
@@ -78,6 +84,7 @@ exports.storeLogin = asyncHandler(async (req, res, next) => {
       },
     });
 });
+
 
 /* =========================
    STORE ASSIGNED COMPLAINTS

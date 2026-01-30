@@ -8,7 +8,7 @@ const sendToken = (user, statusCode, res) => {
     secure: false,     // set true only if using HTTPS
     sameSite: "lax",
 
-    // ✅ FIXED
+    // FIXED
     maxAge: Number(config.COOKIE_EXPIRE || 5) * 24 * 60 * 60 * 1000
   };
 
