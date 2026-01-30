@@ -5,7 +5,7 @@ const sendToken = (user, statusCode, res) => {
 
   const options = {
     httpOnly: true,
-    secure: false,     // set true only if using HTTPS
+    secure: false,    
     sameSite: "lax",
 
     // FIXED
