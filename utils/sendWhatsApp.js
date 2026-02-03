@@ -7,27 +7,39 @@ const sendWhatsApp = async (phone, otp) => {
       throw new Error("WhatsApp ENV missing");
     }
 
-    // ✅ phone normalize
+    // 🔥 phone normalize
     const cleanPhone = phone.replace(/\D/g, "");
     const to = cleanPhone.startsWith("91")
       ? cleanPhone
       : `91${cleanPhone}`;
 
     const payload = {
-      messaging_product: "whatsapp",
-      to,
-      type: "template",
-      template: {
-        name: "otp", // EXACT template name
-        language: { code: "en" },
-        components: [
+  messaging_product: "whatsapp",
+  to,
+  type: "template",
+  template: {
+    name: "otp",
+    language: { code: "en" },
+    components: [
+      {
+        type: "body",
+        parameters: [{ type: "text", text: otp }],
+      },
+      {
+        type: "button",
+        sub_type: "url",
+        index: 0,
+        parameters: [
           {
-            type: "body",
-            parameters: [{ type: "text", text: otp }],
-          },
+            type: "payload",
+            payload: otp
+          }
         ],
       },
-    };
+    ],
+  },
+};
+
 
     const response = await axios.post(
       `https://graph.facebook.com/v22.0/${config.WHATSAPP_PHONE_ID}/messages`,
@@ -48,6 +60,7 @@ const sendWhatsApp = async (phone, otp) => {
       error.response?.data || error.message
     );
 
+    // 🔥 VERY IMPORTANT
     throw new Error(
       error.response?.data?.error?.message || "WhatsApp OTP failed"
     );

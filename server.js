@@ -71,10 +71,6 @@ const app = require("./app")
 const config = require("./config/index.js")
 const http = require("http")
 
-
-
-
-
 process.on("uncaughtException",(err)=>{
     console.log(`Error: ${err.message}`);
     console.log(`shutting down the server due to uncaught error`)
