@@ -1,28 +1,29 @@
-const AWS = require("aws-sdk");
-const config = require("./index");
-const { v4: uuidv4 } = require("uuid");
+const aws = require("@aws-sdk/client-s3")
+const fs = require("fs")
+const config = require("./index")
+const uuid = require("uuid").v4
 
-AWS.config.update({
-  accessKeyId: config.KEY_ID,
-  secretAccessKey: config.SECRECT_KEY,
+
+const s3 = new S3Client({
   region: config.REGION,
+  credentials: {
+    accessKeyId: config.KEY_ID,
+    secretAccessKey: config.SECRECT_KEY,
+  },
 });
 
-const s3 = new AWS.S3();
 
-const uploadFile = async (file) => {
-  const fileKey = `blog/${uuidv4()}.jpg`;
 
-  const params = {
-    Bucket: config.BUCKET_NAME,  // 🔥 yahi important hai
-    Key: fileKey,
-    Body: file.buffer,           // 🔥 multer buffer
-    ContentType: file.mimetype,
-  };
 
-  const data = await s3.upload(params).promise();
+const uploadFile = async (file) =>{
+    const param = {
+        Bucket: config.BUCKET_NAME,
+        key: `upload/${uuid()}`,
+        Body: file
+    }
 
-  return data.Location;
-};
+      const command = new PutObjectCommand(params);
+  return await s3.send(command);
+}
 
-module.exports = uploadFile;
+module.exports = uploadFile
