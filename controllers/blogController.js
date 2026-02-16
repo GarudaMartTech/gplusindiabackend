@@ -15,7 +15,7 @@ const s3 = new AWS.S3({
 // S3 UPLOAD HELPER
 async function uploadBufferToS3(buffer, bucketPath, mimetype) {
   const params = {
-    Bucket: config.BUCKET_NAME,
+    Bucket: config.AWS_BUCKET_NAME,
     Key: bucketPath,
     Body: buffer,
     ContentType: mimetype,

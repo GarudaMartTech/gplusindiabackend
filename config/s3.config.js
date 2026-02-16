@@ -15,7 +15,7 @@ const s3 = new aws.S3({
 
 const uploadFile = async (file) =>{
     const param = {
-        Bucket: config.BUCKET_NAME,
+        Bucket: config.AWS_BUCKET_NAME,
         key: `upload/${uuid()}`,
         Body: file
     }

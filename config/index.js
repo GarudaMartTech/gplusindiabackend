@@ -23,7 +23,7 @@ const config = {
   KEY_ID: process.env.KEY_ID,
   SECRECT_KEY: process.env.SECRECT_KEY,
   REGION: process.env.REGION,
-  BUCKET_NAME: process.env.BUCKET_NAME,
+  AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
   // PUBLISHABLE_KEY:process.env.PUBLISHABLE_KEY,
   // STRIPE_SECRECT_KEY:process.env.STRIPE_SECRECT_KEY,
   // STRIPE_ENDPOINT_SECRECT:process.env.STRIPE_ENDPOINT_SECRECT
