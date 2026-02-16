@@ -33,7 +33,7 @@ router.post(
 // STORE LOGIN
 router.post("/login", storeLogin);
 
-// STORE → ASSIGNED COMPLAINTS
+// STORE ASSIGNED COMPLAINTS
 router.get(
   "/complaints",
   isAuthenticatedStore,
@@ -41,7 +41,7 @@ router.get(
   getAssignedComplaints
 );
 
-// ADMIN → GET ALL STORES
+// ADMIN  GET ALL STORES
 router.get(
   "/",
   isAuthenticatedUser,
@@ -49,7 +49,7 @@ router.get(
   getAllStores
 );
 
-// STORE → DASHBOARD
+// STORE  DASHBOARD
 router.get(
   "/dashboard",
   isAuthenticatedStore,

@@ -17,8 +17,8 @@ router.post("/", protect, upload.single("file"), async (req, res) => {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
       Body: req.file.buffer,
-      ContentType: req.file.mimetype,
-      // ACL: "public-read",
+      ContentType: req.file.mimetype,       
+      
     };
 
     await s3.send(new PutObjectCommand(params));

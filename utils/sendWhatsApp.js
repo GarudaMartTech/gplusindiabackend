@@ -7,13 +7,13 @@ const sendWhatsApp = async (phone, otp) => {
       throw new Error("WhatsApp ENV missing");
     }
 
-    // 🔥 phone normalize
+    //  phone normalize
     const cleanPhone = phone.replace(/\D/g, "");
     const to = cleanPhone.startsWith("91")
       ? cleanPhone
       : `91${cleanPhone}`;
 
-    const payload = {
+const payload = {
   messaging_product: "whatsapp",
   to,
   type: "template",
@@ -25,20 +25,11 @@ const sendWhatsApp = async (phone, otp) => {
         type: "body",
         parameters: [{ type: "text", text: otp }],
       },
-      {
-        type: "button",
-        sub_type: "url",
-        index: 0,
-        parameters: [
-          {
-            type: "payload",
-            payload: otp
-          }
-        ],
-      },
     ],
   },
 };
+
+
 
 
     const response = await axios.post(
@@ -60,7 +51,7 @@ const sendWhatsApp = async (phone, otp) => {
       error.response?.data || error.message
     );
 
-    // 🔥 VERY IMPORTANT
+    // VERY IMPORTANT
     throw new Error(
       error.response?.data?.error?.message || "WhatsApp OTP failed"
     );

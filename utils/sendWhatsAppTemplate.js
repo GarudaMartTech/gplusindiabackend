@@ -63,10 +63,10 @@ const sendWhatsAppTemplate = async (
       }
     );
 
-    console.log("✅ WhatsApp SENT SUCCESS");
+    console.log(" WhatsApp SENT SUCCESS");
     return response.data;
   } catch (error) {
-    console.error("❌ WhatsApp ERROR:", error?.response?.data || error.message);
+    console.error(" WhatsApp ERROR:", error?.response?.data || error.message);
   }
 };
 

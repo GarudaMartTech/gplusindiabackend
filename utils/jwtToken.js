@@ -3,14 +3,14 @@ const config = require("../config/index.js");
 const sendToken = (user, statusCode, res) => {  
   const token = user.getJWTToken();
 
-  const options = {
-    httpOnly: true,
-    secure: false,    
-    sameSite: "lax",
+ const options = {
+  httpOnly: true,
+  secure: false,      // localhost ke liye false
+  sameSite: "none",   // ⭐ MOST IMPORTANT FIX
+  maxAge: Number(config.COOKIE_EXPIRE || 5) * 24 * 60 * 60 * 1000,
+};
 
-    // FIXED
-    maxAge: Number(config.COOKIE_EXPIRE || 5) * 24 * 60 * 60 * 1000
-  };
+
 
   res.cookie("token", token, options);
 

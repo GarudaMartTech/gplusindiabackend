@@ -7,7 +7,12 @@ const Store = require("../models/Store");
 
 /* ================= USER / ADMIN ================= */
 exports.isAuthenticatedUser = asyncHandler(async (req, res, next) => {
-  const { token } = req.cookies;
+  let token = req.cookies.token;
+
+  // ⭐ NEW: also check Authorization header
+  if (!token && req.headers.authorization) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   if (!token) {
     return next(new ErrorHandler("Please login", 401));
@@ -47,7 +52,11 @@ exports.authorizeRoles = (...roles) => {
 
 /* ================= STORE ================= */
 exports.isAuthenticatedStore = asyncHandler(async (req, res, next) => {
-  const { token } = req.cookies;
+  let token = req.cookies.token;
+
+  if (!token && req.headers.authorization) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   if (!token) {
     return next(new ErrorHandler("Store login required", 401));
@@ -75,7 +84,11 @@ exports.isAuthenticatedStore = asyncHandler(async (req, res, next) => {
 
 /* ================= USER OR STORE ================= */
 exports.isAuthenticatedUserOrStore = asyncHandler(async (req, res, next) => {
-  const { token } = req.cookies;
+  let token = req.cookies.token;
+
+  if (!token && req.headers.authorization) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   if (!token) {
     return next(new ErrorHandler("Login required", 401));
