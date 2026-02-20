@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const connectDb = require("./database/db.js");
 const errorMiddleware = require("./middleware/error.js");
@@ -12,7 +13,7 @@ const storeRouter = require("./routes/storeRoute.js");
 const config = require("./config/index.js");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-require("dotenv").config();
+
 const cors = require("cors");
 
 const app = express();
