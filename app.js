@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "http://192.168.0.107:3000",
+      "http://192.168.0.106:3000",
       "https://gplusindia.com",
       "https://www.gplusindia.com",
     ],

@@ -13,24 +13,34 @@ const sendWhatsApp = async (phone, otp) => {
       ? cleanPhone
       : `91${cleanPhone}`;
 
-const payload = {
-  messaging_product: "whatsapp",
-  to,
-  type: "template",
-  template: {
-    name: "otp",
-    language: { code: "en" },
-    components: [
-      {
-        type: "body",
-        parameters: [{ type: "text", text: otp }],
+    const payload = {
+      messaging_product: "whatsapp",
+      to,
+      type: "template",
+      template: {
+        name: "otp",
+        language: { code: "en" },
+        components: [
+          {
+            type: "body",
+            parameters: [{ type: "text", text: otp.toString() }],
+          },
+
+          // ✅ FIX — URL BUTTON PARAMETER ADD KIYA
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [
+              {
+                type: "text",
+                text: otp.toString(), // 👈 REQUIRED PARAMETER
+              },
+            ],
+          },
+        ],
       },
-    ],
-  },
-};
-
-
-
+    };
 
     const response = await axios.post(
       `https://graph.facebook.com/v22.0/${config.WHATSAPP_PHONE_ID}/messages`,
@@ -51,7 +61,6 @@ const payload = {
       error.response?.data || error.message
     );
 
-    // VERY IMPORTANT
     throw new Error(
       error.response?.data?.error?.message || "WhatsApp OTP failed"
     );
