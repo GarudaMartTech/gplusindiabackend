@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require("express");
 const connectDb = require("./database/db.js");
 const errorMiddleware = require("./middleware/error.js");
@@ -13,7 +12,7 @@ const storeRouter = require("./routes/storeRoute.js");
 const config = require("./config/index.js");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-
+require("dotenv").config();
 const cors = require("cors");
 
 const app = express();
@@ -26,7 +25,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "http://192.168.0.106:3000",
+      "http://192.168.0.103:3000",
       "https://gplusindia.com",
       "https://www.gplusindia.com",
     ],

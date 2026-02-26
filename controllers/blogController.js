@@ -8,7 +8,7 @@ const config = require("../config/index");
 // AWS S3 CONFIG
 const s3 = new AWS.S3({
   accessKeyId: config.KEY_ID,
-  secretAccessKey: config.SECRECT_KEY,
+  secretAccessKey: config.SECRET_KEY,
   region: config.REGION,
 });
 

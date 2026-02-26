@@ -16,14 +16,14 @@ const server = http.createServer(app);
 
 server.listen(PORT, () => {
   console.log("======================================");
-  console.log(`🚀 Server running successfully`);
-  console.log(`🌍 URL: http://localhost:${PORT}`);
+  console.log(` Server running successfully`);
+  console.log(` URL: http://localhost:${PORT}`);
   console.log("======================================");
 });
 
 // Handle Unhandled Promise Rejections
 process.on("unhandledRejection", (err) => {
-  console.error("UNHANDLED REJECTION 💥");
+  console.error("UNHANDLED REJECTION ");
   console.error(err.name, err.message);
   console.error("Shutting down the server due to unhandled promise rejection...");
 

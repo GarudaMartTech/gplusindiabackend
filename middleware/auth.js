@@ -9,7 +9,7 @@ const Store = require("../models/Store");
 exports.isAuthenticatedUser = asyncHandler(async (req, res, next) => {
   let token = req.cookies.token;
 
-  // ⭐ NEW: also check Authorization header
+  //  NEW: also check Authorization header
   if (!token && req.headers.authorization) {
     token = req.headers.authorization.split(" ")[1];
   }

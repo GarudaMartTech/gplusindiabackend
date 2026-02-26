@@ -6,7 +6,7 @@ const s3 = new S3Client({
   region: config.REGION,
   credentials: {
     accessKeyId: config.KEY_ID,
-    secretAccessKey: config.SECRECT_KEY,
+    secretAccessKey: config.SECRET_KEY,
   },
 });
 
