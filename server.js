@@ -4,7 +4,7 @@ const http = require("http");
 
 // Handle Uncaught Exceptions
 process.on("uncaughtException", (err) => {
-  console.error("UNCAUGHT EXCEPTION 💥");
+  console.error("UNCAUGHT EXCEPTION ");
   console.error(err.name, err.message);
   console.error("Shutting down the server due to uncaught exception...");
   process.exit(1);
@@ -21,7 +21,7 @@ server.listen(PORT, () => {
   console.log("======================================");
 });
 
-// Handle Unhandled Promise Rejections
+
 process.on("unhandledRejection", (err) => {
   console.error("UNHANDLED REJECTION ");
   console.error(err.name, err.message);

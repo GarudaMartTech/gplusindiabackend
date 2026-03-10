@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import Admin from "./models/Admin.js"; // path sahi rakhna
+import Admin from "./models/Admin.js"; 
 
 dotenv.config();
 

@@ -5,8 +5,8 @@ const sendToken = (user, statusCode, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,     
-    sameSite: "none", 
+    secure: false,     
+    sameSite: "lax", 
     maxAge: Number(config.COOKIE_EXPIRE || 5) * 24 * 60 * 60 * 1000,
   };
 

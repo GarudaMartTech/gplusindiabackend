@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "http://192.168.0.103:3000",
+      "http://192.168.0.101:3000",
       "https://gplusindia.com",
       "https://www.gplusindia.com",
     ],
@@ -54,6 +54,35 @@ app.use("/api/v1/complaints", complaintRouter);
 
 /* STORE ROUTES */
 app.use("/api/v1/store", storeRouter);
+
+
+/* =========================
+   WHATSAPP WEBHOOK
+========================= */
+
+app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = "garudamartToken123";
+
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode && token === VERIFY_TOKEN) {
+    console.log("Webhook Verified");
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
+});
+
+ 
+app.post("/webhook", (req, res) => {
+  console.log("Webhook Event:");
+  console.log(JSON.stringify(req.body, null, 2));
+
+  res.sendStatus(200);
+});
+
 
 /* =========================
    ERROR HANDLER

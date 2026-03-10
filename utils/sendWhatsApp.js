@@ -7,7 +7,7 @@ const sendWhatsApp = async (phone, otp) => {
       throw new Error("WhatsApp ENV missing");
     }
 
-    //  phone normalize
+    
     const cleanPhone = phone.replace(/\D/g, "");
     const to = cleanPhone.startsWith("91")
       ? cleanPhone
@@ -26,7 +26,7 @@ const sendWhatsApp = async (phone, otp) => {
             parameters: [{ type: "text", text: otp.toString() }],
           },
 
-          // ✅ FIX — URL BUTTON PARAMETER ADD KIYA
+          
           {
             type: "button",
             sub_type: "url",
@@ -34,7 +34,7 @@ const sendWhatsApp = async (phone, otp) => {
             parameters: [
               {
                 type: "text",
-                text: otp.toString(), // 👈 REQUIRED PARAMETER
+                text: otp.toString(), 
               },
             ],
           },
