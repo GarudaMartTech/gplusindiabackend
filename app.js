@@ -55,8 +55,7 @@ app.use("/api/v1/complaints", complaintRouter);
 /* STORE ROUTES */
 app.use("/api/v1/store", storeRouter);
 
-
-/* =========================
+/*
    WHATSAPP WEBHOOK
 ========================= */
 
@@ -75,14 +74,13 @@ app.get("/webhook", (req, res) => {
   }
 });
 
- 
+
 app.post("/webhook", (req, res) => {
   console.log("Webhook Event:");
   console.log(JSON.stringify(req.body, null, 2));
 
   res.sendStatus(200);
 });
-
 
 /* =========================
    ERROR HANDLER
