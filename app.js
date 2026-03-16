@@ -59,7 +59,7 @@ app.use("/api/v1/store", storeRouter);
    WHATSAPP WEBHOOK
 ========================= */
 
-app.get("/webhook", (req, res) => {
+app.get("/api/v1/webhook", (req, res) => {
   const VERIFY_TOKEN = "garudamartToken123";
 
   const mode = req.query["hub.mode"];
@@ -75,7 +75,7 @@ app.get("/webhook", (req, res) => {
 });
 
 
-app.post("/webhook", (req, res) => {
+app.post("/api/v1/webhook", (req, res) => {
   console.log("Webhook Event:");
   console.log(JSON.stringify(req.body, null, 2));
 
