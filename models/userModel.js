@@ -61,13 +61,13 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-// ✅ FIXED JWT METHOD
+//  FIXED JWT METHOD
 userSchema.methods.getJWTToken = function () {
   return jwt.sign(
     { id: this._id },
     config.JWT_SECRET,
     {
-      expiresIn: config.JWT_EXPIRE || "5d",   // fallback safe value
+      expiresIn: config.JWT_EXPIRE || "5d",  
     }
   );
 };

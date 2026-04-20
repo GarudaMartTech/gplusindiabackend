@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "http://192.168.0.101:3000",
+      "http://192.168.0.100:3000",
       "https://gplusindia.com",
       "https://www.gplusindia.com",
     ],
@@ -74,12 +74,78 @@ app.get("/api/v1/webhook", (req, res) => {
   }
 });
 
+//  HANDLE INCOMING MESSAGES
+const axios = require("axios");
 
-app.post("/api/v1/webhook", (req, res) => {
-  console.log("Webhook Event:");
-  console.log(JSON.stringify(req.body, null, 2));
+const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN; 
+const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID; 
 
-  res.sendStatus(200);
+// Auto Reply Function
+const sendReply = async (to, message) => {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v19.0/${WHATSAPP_PHONE_ID}/messages`,
+      {
+        messaging_product: "whatsapp",
+        to: to,
+        text: { body: message },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("❌ Reply Error:", error.response?.data || error.message);
+  }
+};
+
+
+app.post("/api/v1/webhook", async (req, res) => {
+  try {
+    console.log("📩 Webhook Event Received");
+
+    const body = req.body;
+
+    if (body.object) {
+      const entry = body.entry?.[0];
+      const changes = entry?.changes?.[0];
+      const value = changes?.value;
+
+      //  Incoming Message
+      if (value?.messages) {
+        const message = value.messages[0];
+
+        const from = message.from; // user number
+        const msgType = message.type;
+
+        let userMessage = "";
+
+        if (msgType === "text") {
+          userMessage = message.text.body;
+        }
+
+        console.log("👤 User:", from);
+        console.log("💬 Message:", userMessage);
+
+        //  AUTO REPLY
+        await sendReply(from, "Hello  Thanks for contacting GPlus! Our team will reply soon.");
+      }
+
+      //  Delivery / Status Tracking
+      if (value?.statuses) {
+        const status = value.statuses[0];
+        console.log("📦 Message Status:", status.status);
+      }
+    }
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("❌ Webhook Error:", error);
+    res.sendStatus(500);
+  }
 });
 
 /* =========================
